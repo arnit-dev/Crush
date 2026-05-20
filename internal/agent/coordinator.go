@@ -246,14 +246,6 @@ func (c *coordinator) Run(ctx context.Context, sessionID string, prompt string, 
 		slog.Warn("Goal continuation skipped due to agent error; use /goal resume to continue", "session_id", sessionID, "error", originalErr)
 	}
 
-	if originalErr == nil {
-		go func() {
-			c.goalRuntime.OnTurnFinished(context.Background(), sessionID)
-		}()
-	} else {
-		slog.Warn("Goal continuation skipped due to agent error; use /goal resume to continue", "session_id", sessionID, "error", originalErr)
-	}
-
 	return result, originalErr
 }
 
