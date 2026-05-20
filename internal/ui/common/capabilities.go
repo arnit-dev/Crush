@@ -152,7 +152,6 @@ func isOSC99Response(seq string) bool {
 			}
 
 			ok = isOSC99CapacityPayload(payload)
-
 		},
 	})
 
