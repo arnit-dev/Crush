@@ -1587,9 +1587,7 @@ func (m *UI) handleRemoveRecentModel(msg dialog.ActionRemoveRecentModel) tea.Cmd
 			cmds = append(cmds, msg.Cmd)
 		}
 		cmds = append(cmds, func() tea.Msg {
-			modelMsg := fmt.Sprintf("removed %s from %s provider", msg.Model.Model, msg.ModelType)
-
-			return util.NewInfoMsg(modelMsg)
+			return util.NewInfoMsg(fmt.Sprintf("Removed %s from recent models", msg.Model.Model))
 		})
 	}
 

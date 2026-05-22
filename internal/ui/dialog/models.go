@@ -119,7 +119,7 @@ func NewModels(com *common.Common, isOnboarding bool) (*Models, error) {
 
 	m.keyMap.Tab = key.NewBinding(
 		key.WithKeys("tab", "shift+tab"),
-		key.WithHelp("tab", "toggle type"),
+		key.WithHelp("tab", "toggle"),
 	)
 	m.keyMap.Select = key.NewBinding(
 		key.WithKeys("enter", "ctrl+y"),
@@ -131,7 +131,7 @@ func NewModels(com *common.Common, isOnboarding bool) (*Models, error) {
 	)
 	m.keyMap.Delete = key.NewBinding(
 		key.WithKeys("ctrl+x"),
-		key.WithHelp("ctrl+x", "delete"),
+		key.WithHelp("ctrl+x", "remove"),
 	)
 	m.keyMap.UpDown = key.NewBinding(
 		key.WithKeys("up", "down"),
@@ -227,7 +227,7 @@ func (m *Models) HandleMsg(msg tea.Msg) Action {
 			selected := m.list.Selected()
 
 			modelItem, ok := selectedItem.(*ModelItem)
-			if !ok {
+			if !ok || !modelItem.IsRecent() {
 				break
 			}
 
@@ -346,6 +346,9 @@ func (m *Models) ShortHelp() []key.Binding {
 	if m.isSelectedConfigured() {
 		h = append(h, m.keyMap.Edit)
 	}
+	if m.isSelectedRecent() {
+		h = append(h, m.keyMap.Delete)
+	}
 	h = append(h, m.keyMap.Close)
 	return h
 }
@@ -367,6 +370,18 @@ func (m *Models) isSelectedConfigured() bool {
 	providerID := string(modelItem.prov.ID)
 	_, isConfigured := m.com.Config().Providers.Get(providerID)
 	return isConfigured
+}
+
+func (m *Models) isSelectedRecent() bool {
+	selectedItem := m.list.SelectedItem()
+	if selectedItem == nil {
+		return false
+	}
+	modelItem, ok := selectedItem.(*ModelItem)
+	if !ok {
+		return false
+	}
+	return modelItem.IsRecent()
 }
 
 // setProviderItems sets the provider items in the list.
