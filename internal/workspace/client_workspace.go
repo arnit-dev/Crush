@@ -311,8 +311,30 @@ func (w *ClientWorkspace) PermissionSkipRequests() bool {
 	return skip
 }
 
-func (w *ClientWorkspace) PermissionSetSkipRequests(skip bool) {
-	_ = w.client.SetPermissionsSkipRequests(context.Background(), w.workspaceID(), skip)
+func (w *ClientWorkspace) PermissionMode() permission.PermissionMode {
+	switch w.cached().PermissionMode {
+	case proto.WorkspacePermissionModeSuperYolo:
+		return permission.PermissionModeSuperYolo
+	case proto.WorkspacePermissionModeYolo:
+		return permission.PermissionModeYolo
+	default:
+		return permission.PermissionModeNormal
+	}
+}
+
+func (w *ClientWorkspace) PermissionSetMode(mode permission.PermissionMode) {
+	var protoMode proto.WorkspacePermissionMode
+	switch mode {
+	case permission.PermissionModeSuperYolo:
+		protoMode = proto.WorkspacePermissionModeSuperYolo
+	case permission.PermissionModeYolo:
+		protoMode = proto.WorkspacePermissionModeYolo
+	default:
+		protoMode = proto.WorkspacePermissionModeNormal
+	}
+	if err := w.client.SetPermissionMode(context.Background(), w.workspaceID(), protoMode); err == nil {
+		w.refreshWorkspace()
+	}
 }
 
 // -- FileTracker --
