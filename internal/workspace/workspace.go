@@ -17,6 +17,7 @@ import (
 	"github.com/charmbracelet/crush/internal/message"
 	"github.com/charmbracelet/crush/internal/oauth"
 	"github.com/charmbracelet/crush/internal/permission"
+	"github.com/charmbracelet/crush/internal/question"
 	"github.com/charmbracelet/crush/internal/session"
 )
 
@@ -96,7 +97,7 @@ type Workspace interface {
 	PermissionSetSkipRequests(skip bool)
 
 	// Questions
-	QuestionRespond(id, answer string)
+	QuestionRespond(id string, response question.QuestionResponse)
 
 	// FileTracker
 	FileTrackerRecordRead(ctx context.Context, sessionID, path string)
