@@ -38,6 +38,7 @@ import (
 	"github.com/charmbracelet/crush/internal/message"
 	"github.com/charmbracelet/crush/internal/permission"
 	"github.com/charmbracelet/crush/internal/pubsub"
+	"github.com/charmbracelet/crush/internal/question"
 	"github.com/charmbracelet/crush/internal/session"
 	"github.com/charmbracelet/crush/internal/skills"
 	"github.com/charmbracelet/crush/internal/ui/anim"
@@ -673,6 +674,13 @@ func (m *UI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			Message: fmt.Sprintf("Permission required to execute \"%s\"", msg.Payload.ToolName),
 		}); cmd != nil {
 			cmds = append(cmds, cmd)
+		}
+	case pubsub.Event[question.QuestionRequest]:
+		switch msg.Type {
+		case pubsub.CreatedEvent:
+			m.openQuestionDialog(msg.Payload)
+		case pubsub.DeletedEvent:
+			m.dialog.CloseDialog(dialog.QuestionID)
 		}
 	case pubsub.Event[permission.PermissionNotification]:
 		m.handlePermissionNotification(msg.Payload)
@@ -1515,6 +1523,9 @@ func (m *UI) handleDialogMsg(msg tea.Msg) tea.Cmd {
 		case dialog.PermissionDeny:
 			m.com.Workspace.PermissionDeny(msg.Permission)
 		}
+	case dialog.ActionQuestionResponse:
+		m.dialog.CloseDialog(dialog.QuestionID)
+		m.com.Workspace.QuestionRespond(msg.Request.ID, msg.Response)
 
 	case dialog.ActionFilePickerSelected:
 		cmds = append(cmds, tea.Sequence(
@@ -3409,6 +3420,12 @@ func (m *UI) openFilesDialog() tea.Cmd {
 	m.dialog.OpenDialog(filePicker)
 
 	return cmd
+}
+
+// openQuestionDialog opens the question dialog for a model question request.
+func (m *UI) openQuestionDialog(req question.QuestionRequest) {
+	m.dialog.CloseDialog(dialog.QuestionID)
+	m.dialog.OpenDialog(dialog.NewQuestion(m.com, req))
 }
 
 // openPermissionsDialog opens the permissions dialog for a permission request.
